@@ -21,7 +21,7 @@ Ecommerce Item Utility is a custom variable template designed for Google Tag Man
    - Fill in the following fields to set up the variable:
      - **Item Object Variable**: Specify the variable containing the array of ecommerce items (e.g., `{{dlv - ecommerce.items}}`).
      - **Custom Key Name**: Enter the attribute key you want to evaluate (e.g., `item_name`).
-     - **Filter Value**: Provide the value to match against the attribute key.
+     - **Filter Value**: Provide the value to match against the attribute key, you can do multiple items lookup.
      - **Type of Matching Check**: Choose between `Exact Match` or `Contains`.
      - **Action Output**: Select either `Check Product Presence` or `Retrieve Product Details`.
 
