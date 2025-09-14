@@ -10,14 +10,17 @@ ___INFO___
 
 {
   "type": "MACRO",
-  "id": "cvt_temp_public_id",
+  "id": "cvt_NFPXH",
   "version": 1,
-  "securityGroups": [],
   "displayName": "Ecommerce Item Utility",
+  "categories": [
+    "UTILITY"
+  ],
   "description": "A versatile GTM variable for checking product presence or retrieving product details from an array using exact or partial attribute matching.",
   "containerContexts": [
     "WEB"
-  ]
+  ],
+  "securityGroups": []
 }
 
 
@@ -41,12 +44,23 @@ ___TEMPLATE_PARAMETERS___
     "help": "Enter the custom key in the item object that you want to target."
   },
   {
-    "type": "TEXT",
-    "name": "itemValueEvaluation",
+    "type": "PARAM_TABLE",
+    "name": "itemValueEvaluationTable",
     "displayName": "Filter Value",
-    "simpleValueType": true,
-    "help": "Specify the value of the key in the item object that you want to filter or evaluate.",
-    "valueHint": "e.g., product name"
+    "paramTableColumns": [
+      {
+        "param": {
+          "type": "TEXT",
+          "name": "itemValueEvaluationColumn",
+          "displayName": "Filter Value",
+          "simpleValueType": true,
+          "valueHint": "e.g., product name",
+          "help": "Enter the value to filter based on the specified attribute."
+        },
+        "isUnique": false
+      }
+    ],
+    "help": "Add multiple rows to define filter values for the specified attributes."
   },
   {
     "type": "RADIO",
@@ -94,51 +108,45 @@ const JSON = require('JSON');
 // Input variables
 const customItemObjVar = data.customItemObjVar;
 const customItemObjectKeyVar = makeString(data.customItemObjectKeyVar);
-const itemValueEvaluation = makeString(data.itemValueEvaluation);
-const matchingType = makeString(data.matchingType); // Get the matching type from the radio button
-const computeOutput = makeString(data.computeOutput); // Get the desired output type
+const matchingType = makeString(data.matchingType);
+const computeOutput = makeString(data.computeOutput);
 
-// Check if customItemObjVar is an array using getType
+// Extract all filter values from the param table
+const itemValueEvaluationArray = (data.itemValueEvaluationTable || []).map(row => makeString(row.itemValueEvaluationColumn).toLowerCase());
+
+// Check if customItemObjVar is an array
 const isArray = getType(customItemObjVar) === 'array';
-
-// If customItemObjVar is not an array, return an appropriate default based on computeOutput
 if (!isArray) {
   return computeOutput === 'itemPresenceStatus' ? false : [];
 }
 
-// Normalize the evaluation value for case-insensitive comparison
-const normalizedValue = itemValueEvaluation.toLowerCase();
-
-// Initialize variables for tracking results
-let found = false; // Used for presence status
-const matchedItems = []; // Used for retrieving matching objects
+let found = false;
+const matchedItems = [];
 
 // Iterate through the array
 customItemObjVar.forEach(function(item) {
-  if (computeOutput === 'itemPresenceStatus' && found) return; // Stop further iteration for presence check if found
+  if (computeOutput === 'itemPresenceStatus' && found) return;
 
-  // Safely access the value of the target key
   const value = item[customItemObjectKeyVar];
-
   if (value) {
     const normalizedItemValue = makeString(value).toLowerCase();
 
-    // Perform the matching based on the selected matching type
-    const isMatch =
-      (matchingType === 'exactMatchCheck' && normalizedItemValue === normalizedValue) ||
-      (matchingType === 'containsMatchCheck' && normalizedItemValue.indexOf(normalizedValue) !== -1);
+    // Check if any of the filter values match based on the selected type
+    const isMatch = itemValueEvaluationArray.some(filterValue =>
+      (matchingType === 'exactMatchCheck' && normalizedItemValue === filterValue) ||
+      (matchingType === 'containsMatchCheck' && normalizedItemValue.indexOf(filterValue) !== -1)
+    );
 
     if (isMatch) {
       if (computeOutput === 'itemPresenceStatus') {
-        found = true; // Set flag to true for presence check
+        found = true;
       } else if (computeOutput === 'retrieveProductObject') {
-        matchedItems.push(item); // Add matching object to the result array
+        matchedItems.push(item);
       }
     }
   }
 });
 
-// Return results based on computeOutput
 return computeOutput === 'itemPresenceStatus' ? found : matchedItems;
 
 
