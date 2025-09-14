@@ -2,5 +2,10 @@
 homepage: https://www.linkedin.com/in/jonah-onyejekwe/
 documentation: https://github.com/jonah-onyejekwe/gtm-ecommerce-item-utility
 versions:
+# LATEST VERSION
+  - sha: 9533ba754051167f5d2e96d5ce6e5e1549aad143
+    changeNotes: Supports multiple item lookup.
+    
+# INITIAL VERSION
   - sha: 48718f4c75f9f6f38c06dabc265db4caa978e256
     changeNotes: Initial release.
